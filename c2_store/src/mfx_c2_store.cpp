@@ -24,6 +24,7 @@
 #include "mfx_debug.h"
 #include "mfx_c2_debug.h"
 #include "mfx_c2_component.h"
+#include <android-base/properties.h>
 #include <cutils/properties.h>
 
 #include <dlfcn.h>
@@ -264,6 +265,43 @@ static void MfxC2GetField(const std::string &line, std::string *str, size_t *str
     MFX_DEBUG_TRACE_I32(*str_pos);
 }
 
+static bool isCodecSupportedByGPU(const std::string codec) {
+    // Every modern Intel GPU supports MPEG2
+    if (codec == "c2.intel.mp2.decoder") return true;
+
+    const std::string supported_codecs = ::android::base::GetProperty("ro.waydroid.hwcodecs", "");
+    const bool is_encoder = (codec.find(".encoder") != std::string::npos);
+
+    if (codec.find("h264") != std::string::npos) {
+        return (
+            (is_encoder ? supported_codecs.find("H264E") : supported_codecs.find("H264D")) != std::string::npos ||
+            (is_encoder ? supported_codecs.find("S264E") : supported_codecs.find("S264D")) != std::string::npos
+        );
+    } else if (codec.find("hevc") != std::string::npos) {
+        return (
+            (is_encoder ? supported_codecs.find("HEVCE") : supported_codecs.find("HEVCD")) != std::string::npos ||
+            (is_encoder ? supported_codecs.find("S265E") : supported_codecs.find("S265D")) != std::string::npos
+        );
+    } else if (codec.find("vp8") != std::string::npos) {
+        return (
+            (is_encoder ? supported_codecs.find("VP80E") : supported_codecs.find("VP80D")) != std::string::npos ||
+            (is_encoder ? supported_codecs.find("VP8FE") : supported_codecs.find("VP8FD")) != std::string::npos
+        );
+    } else if (codec.find("vp9") != std::string::npos) {
+        return (
+            (is_encoder ? supported_codecs.find("VP90E") : supported_codecs.find("VP90D")) != std::string::npos ||
+            (is_encoder ? supported_codecs.find("VP9FE") : supported_codecs.find("VP9FD")) != std::string::npos
+        );
+    } else if (codec.find("av1") != std::string::npos) {
+        return (
+            (is_encoder ? supported_codecs.find("AV10E") : supported_codecs.find("AV10D")) != std::string::npos ||
+            (is_encoder ? supported_codecs.find("AV1FE") : supported_codecs.find("AV1FD")) != std::string::npos
+        );
+    }
+
+    return false;
+}
+
 c2_status_t MfxC2ComponentStore::readConfigFile()
 {
     MFX_DEBUG_TRACE_FUNC;
@@ -288,7 +326,7 @@ c2_status_t MfxC2ComponentStore::readConfigFile()
 
     std::ifstream config_file(config_filename.c_str(), std::ifstream::in);
 
-    if (config_file)
+    if (::android::base::GetProperty("ro.waydroid.codec2-impl", "c2.ffmpeg") == "c2.intel" && config_file)
     {
         MFX_DEBUG_TRACE_S(config_filename.c_str());
         std::string line, str, name, module;
@@ -304,6 +342,8 @@ c2_status_t MfxC2ComponentStore::readConfigFile()
             if (str.empty()) continue; // line is empty or field is the last one
             name = str;
             MFX_DEBUG_TRACE_S(name.c_str());
+
+            if (!isCodecSupportedByGPU(name)) continue;
 
             // getting module
             MfxC2GetField(line, &str, &pos);
