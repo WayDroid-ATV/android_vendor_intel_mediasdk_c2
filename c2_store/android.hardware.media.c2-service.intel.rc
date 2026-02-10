@@ -4,4 +4,3 @@ service hardware-intel-media-c2-hal /vendor/bin/hw/android.hardware.media.c2-ser
     group camera mediadrm drmrpc
     ioprio rt 4
     task_profiles ProcessCapacityHigh
-

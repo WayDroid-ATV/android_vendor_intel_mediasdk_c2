@@ -59,7 +59,11 @@ cc_binary {
         "libbinder",
         "libbinder_ndk",
     ],
-    required: ["android.hardware.media.c2-vendor-seccomp_policy"],
+    required: [
+        "android.hardware.media.c2-vendor-seccomp_policy",
+        "media_codecs_intel_c2_video.xml",
+        "mfx_c2_store.conf",
+    ],
 
     // The content in manifest_media_c2_default.xml can be included
     // directly in the main device manifest.xml file or via vintf_fragments.
@@ -99,4 +103,16 @@ prebuilt_etc {
 
     //This may be removed.
     required: ["crash_dump.policy"],
+}
+
+prebuilt_etc {
+    name: "media_codecs_intel_c2_video.xml",
+    vendor: true,
+    src: "media_codecs_intel_c2_video.xml",
+}
+
+prebuilt_etc {
+    name: "mfx_c2_store.conf",
+    vendor: true,
+    src: "mfx_c2_store.conf",
 }
