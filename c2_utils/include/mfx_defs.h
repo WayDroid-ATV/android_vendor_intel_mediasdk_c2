@@ -33,20 +33,7 @@
 #endif
 
 // includes below are to get Intel color formats
-
-#if PLATFORM_SDK_VERSION >= 35
-    #define USE_MAPPER5
-#elif PLATFORM_SDK_VERSION >= 34
-    #define USE_GRALLOC4
-#else
-#ifdef MFX_C2_USE_PRIME
-    // USE_GRALLOC1 required for using PRIME buffer descriptor -
-    // opens definition GRALLOC1_PFN_GET_PRIME in
-    // i915_private_android_types.h
-    #define USE_GRALLOC1
-#endif // MFX_C2_USE_PRIME
-#endif
-
+#define USE_GRALLOC4
 #define DRV_I915
 #include <i915_private_android_types.h>
 

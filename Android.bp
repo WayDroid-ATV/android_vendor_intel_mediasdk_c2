@@ -29,6 +29,7 @@ mfx_cc_defaults {
     cflags: [
         "-Wall",
         "-Werror",
+        "-Wno-enum-constexpr-conversion",
 
         "-fstack-protector-strong",
         "-fPIE",
