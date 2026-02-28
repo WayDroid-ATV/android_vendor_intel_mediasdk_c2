@@ -46,7 +46,7 @@ public:
 protected:
     hw_module_t const* m_hwModule {};
 
-    template<typename FuncType, gralloc1_function_descriptor_t FuncId>
+    template<typename FuncType, int FuncId>
     class Gralloc1Func
     {
     private:
@@ -66,7 +66,7 @@ protected:
     Gralloc1Func<GRALLOC1_PFN_GET_FORMAT, GRALLOC1_FUNCTION_GET_FORMAT> m_grGetFormatFunc;
     Gralloc1Func<GRALLOC1_PFN_GET_DIMENSIONS, GRALLOC1_FUNCTION_GET_DIMENSIONS> m_grGetDimensionsFunc;
     Gralloc1Func<GRALLOC1_PFN_GET_NUM_FLEX_PLANES, GRALLOC1_FUNCTION_GET_NUM_FLEX_PLANES> m_grGetNumFlexPlanesFunc;
-    Gralloc1Func<GRALLOC1_PFN_GET_BYTE_STRIDE, (gralloc1_function_descriptor_t)GRALLOC1_FUNCTION_GET_BYTE_STRIDE> m_grGetByteStrideFunc;
+    Gralloc1Func<GRALLOC1_PFN_GET_BYTE_STRIDE, GRALLOC1_FUNCTION_GET_BYTE_STRIDE> m_grGetByteStrideFunc;
     Gralloc1Func<GRALLOC1_PFN_ALLOCATE, GRALLOC1_FUNCTION_ALLOCATE> m_grAllocateFunc;
     Gralloc1Func<GRALLOC1_PFN_RELEASE, GRALLOC1_FUNCTION_RELEASE> m_grReleaseFunc;
     Gralloc1Func<GRALLOC1_PFN_LOCK, GRALLOC1_FUNCTION_LOCK> m_grLockFunc;
@@ -80,6 +80,6 @@ protected:
     Gralloc1Func<GRALLOC1_PFN_IMPORT_BUFFER, GRALLOC1_FUNCTION_IMPORT_BUFFER> m_grImportBufferFunc;
     Gralloc1Func<GRALLOC1_PFN_GET_BACKING_STORE, GRALLOC1_FUNCTION_GET_BACKING_STORE> m_grGetBackingStoreFunc;
 #ifdef MFX_C2_USE_PRIME
-    Gralloc1Func<GRALLOC1_PFN_GET_PRIME, (gralloc1_function_descriptor_t)GRALLOC1_FUNCTION_GET_PRIME> m_grGetPrimeFunc;
+    Gralloc1Func<GRALLOC1_PFN_GET_PRIME, GRALLOC1_FUNCTION_GET_PRIME> m_grGetPrimeFunc;
 #endif
 };
