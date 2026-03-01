@@ -24,6 +24,7 @@
 #include "mfx_debug.h"
 #include "mfx_c2_debug.h"
 #include "mfx_c2_component.h"
+#include <android/api-level.h>
 #include <android-base/properties.h>
 #include <cutils/properties.h>
 
@@ -268,6 +269,9 @@ static void MfxC2GetField(const std::string &line, std::string *str, size_t *str
 static bool isCodecSupportedByGPU(const std::string codec) {
     // Every modern Intel GPU supports MPEG2
     if (codec == "c2.intel.mp2.decoder") return true;
+
+    // Disable AV1 decoder on A16, as it does not work properly when playing 1080p+ videos (at least on ARL)
+    if (codec == "c2.intel.av1.decoder" && android_get_device_api_level() >= 36) return false;
 
     const std::string supported_codecs = ::android::base::GetProperty("ro.waydroid.hwcodecs", "");
     const bool is_encoder = (codec.find(".encoder") != std::string::npos);
