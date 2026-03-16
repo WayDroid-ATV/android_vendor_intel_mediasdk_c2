@@ -265,12 +265,14 @@ static void MfxC2GetField(const std::string &line, std::string *str, size_t *str
     MFX_DEBUG_TRACE_I32(*str_pos);
 }
 
-static bool isCodecSupportedByGPU(const std::string codec) {
-    // Every modern Intel GPU supports MPEG2
-    if (codec == "c2.intel.mp2.decoder") return true;
-
+static bool shouldEnableCodec(const std::string codec, const bool encoder_only) {
     const std::string supported_codecs = ::android::base::GetProperty("ro.waydroid.hwcodecs", "");
     const bool is_encoder = (codec.find(".encoder") != std::string::npos);
+
+    if (encoder_only && !is_encoder) return false;
+
+    // Every modern Intel GPU supports MPEG2
+    if (codec == "c2.intel.mp2.decoder") return true;
 
     if (codec.find("avc") != std::string::npos) {
         return (
@@ -306,7 +308,7 @@ c2_status_t MfxC2ComponentStore::readConfigFile()
 {
     MFX_DEBUG_TRACE_FUNC;
     c2_status_t c2_res = C2_OK;
-    std::string config_filename;
+    std::string codec2_impl, config_filename;
 
     config_filename.append(MFX_C2_CONFIG_FILE_PATH);
     config_filename.append("/");
@@ -326,7 +328,9 @@ c2_status_t MfxC2ComponentStore::readConfigFile()
 
     std::ifstream config_file(config_filename.c_str(), std::ifstream::in);
 
-    if (::android::base::GetProperty("ro.waydroid.codec2-impl", "c2.ffmpeg") == "c2.intel" && config_file)
+    codec2_impl = ::android::base::GetProperty("ro.waydroid.codec2-impl", "");
+
+    if ((codec2_impl == "intel" || codec2_impl == "intel+ffmpeg") && config_file)
     {
         MFX_DEBUG_TRACE_S(config_filename.c_str());
         std::string line, str, name, module;
@@ -343,7 +347,7 @@ c2_status_t MfxC2ComponentStore::readConfigFile()
             name = str;
             MFX_DEBUG_TRACE_S(name.c_str());
 
-            if (!isCodecSupportedByGPU(name)) continue;
+            if (!shouldEnableCodec(name, codec2_impl == "intel+ffmpeg" ? true : false)) continue;
 
             // getting module
             MfxC2GetField(line, &str, &pos);
